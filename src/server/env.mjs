@@ -4,7 +4,7 @@ import { z } from 'zod';
 export const env = createEnv({
   server: {
 
-    // Postgres, for optional storage via Prisma
+    // Backend Postgres, for optional storage via Prisma
     POSTGRES_PRISMA_URL: z.string().url().optional(),
     POSTGRES_URL_NON_POOLING: z.string().url().optional(),
 
@@ -20,6 +20,9 @@ export const env = createEnv({
     // LLM: Anthropic
     ANTHROPIC_API_KEY: z.string().optional(),
     ANTHROPIC_API_HOST: z.string().url().optional(),
+
+    // LLM: Mistral
+    MISTRAL_API_KEY: z.string().optional(),
 
     // LLM: Ollama
     OLLAMA_API_HOST: z.string().url().optional(),
@@ -44,7 +47,14 @@ export const env = createEnv({
 
     // Browsing Service
     PUPPETEER_WSS_ENDPOINT: z.string().url().optional(),
-    
+
+    // Backend: Analytics flags (e.g. which hostname responds) for managed installs
+    BACKEND_ANALYTICS: z.string().optional().transform(list => (list || '').split(';').filter(flag => !!flag)),
+
+    // Backend: HTTP Basic Authentication
+    HTTP_BASIC_AUTH_USERNAME: z.string().optional(),
+    HTTP_BASIC_AUTH_PASSWORD: z.string().optional(),
+
   },
 
   onValidationError: error => {

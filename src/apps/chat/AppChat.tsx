@@ -12,15 +12,16 @@ import { TradeConfig, TradeModal } from '~/modules/trade/TradeModal';
 import { imaginePromptFromText } from '~/modules/aifn/imagine/imaginePromptFromText';
 import { speakText } from '~/modules/elevenlabs/elevenlabs.client';
 import { useBrowseStore } from '~/modules/browse/store-module-browsing';
-import { useModelsStore } from '~/modules/llms/store-llms';
+import { useChatLLM, useModelsStore } from '~/modules/llms/store-llms';
 
 import { ConfirmationModal } from '~/common/components/ConfirmationModal';
+import { GlobalShortcutItem, ShortcutKeyName, useGlobalShortcuts } from '~/common/components/useGlobalShortcut';
 import { addSnackbar, removeSnackbar } from '~/common/components/useSnackbarsStore';
 import { createDMessage, DConversationId, DMessage, getConversation, useConversation } from '~/common/state/store-chats';
-import { GlobalShortcutItem, ShortcutKeyName, useGlobalShortcuts } from '~/common/components/useGlobalShortcut';
-import { useLayoutPluggable } from '~/common/layout/store-applayout';
+import { openLayoutLLMOptions, useLayoutPluggable } from '~/common/layout/store-applayout';
 import { useUXLabsStore } from '~/common/state/store-ux-labs';
 
+import type { ComposerOutputMultiPart } from './components/composer/composer.types';
 import { ChatDrawerItemsMemo } from './components/applayout/ChatDrawerItems';
 import { ChatDropdowns } from './components/applayout/ChatDropdowns';
 import { ChatMenuItems } from './components/applayout/ChatMenuItems';
@@ -57,6 +58,8 @@ export function AppChat() {
   const composerTextAreaRef = React.useRef<HTMLTextAreaElement>(null);
 
   // external state
+  const { chatLLM } = useChatLLM();
+
   const {
     chatPanes,
     focusedConversationId,
@@ -180,13 +183,33 @@ export function AppChat() {
     setMessages(conversationId, history);
   }, [focusedSystemPurposeId, setMessages]);
 
-  const handleComposerNewMessage = async (chatModeId: ChatModeId, conversationId: DConversationId, userText: string) => {
+  const handleComposerAction = (chatModeId: ChatModeId, conversationId: DConversationId, multiPartMessage: ComposerOutputMultiPart): boolean => {
+
+    // validate inputs
+    if (multiPartMessage.length !== 1 || multiPartMessage[0].type !== 'text-block') {
+      addSnackbar({
+        key: 'chat-composer-action-invalid',
+        message: 'Only a single text part is supported for now.',
+        type: 'issue',
+        overrides: {
+          autoHideDuration: 2000,
+        },
+      });
+      return false;
+    }
+    const userText = multiPartMessage[0].text;
+
+    // find conversation
     const conversation = getConversation(conversationId);
-    if (conversation)
-      return await _handleExecute(chatModeId, conversationId, [
-        ...conversation.messages,
-        createDMessage('user', userText),
-      ]);
+    if (!conversation)
+      return false;
+
+    // start execution (async)
+    void _handleExecute(chatModeId, conversationId, [
+      ...conversation.messages,
+      createDMessage('user', userText),
+    ]);
+    return true;
   };
 
   const handleConversationExecuteHistory = async (conversationId: DConversationId, history: DMessage[]) =>
@@ -291,7 +314,14 @@ export function AppChat() {
 
   // Shortcuts
 
+  const handleOpenChatLlmOptions = React.useCallback(() => {
+    const { chatLLMId } = useModelsStore.getState();
+    if (!chatLLMId) return;
+    openLayoutLLMOptions(chatLLMId);
+  }, []);
+
   const shortcuts = React.useMemo((): GlobalShortcutItem[] => [
+    ['o', true, true, false, handleOpenChatLlmOptions],
     ['r', true, true, false, handleMessageRegenerateLast],
     ['n', true, false, true, handleConversationNew],
     ['b', true, false, true, () => isFocusedChatEmpty || focusedConversationId && handleConversationBranch(focusedConversationId, null)],
@@ -299,7 +329,7 @@ export function AppChat() {
     ['d', true, false, true, () => focusedConversationId && handleConversationDelete(focusedConversationId, false)],
     [ShortcutKeyName.Left, true, false, true, () => handleNavigateHistory('back')],
     [ShortcutKeyName.Right, true, false, true, () => handleNavigateHistory('forward')],
-  ], [focusedConversationId, handleConversationBranch, handleConversationDelete, handleConversationNew, handleMessageRegenerateLast, handleNavigateHistory, isFocusedChatEmpty]);
+  ], [focusedConversationId, handleConversationBranch, handleConversationDelete, handleConversationNew, handleMessageRegenerateLast, handleNavigateHistory, handleOpenChatLlmOptions, isFocusedChatEmpty]);
   useGlobalShortcuts(shortcuts);
 
 
@@ -357,6 +387,7 @@ export function AppChat() {
 
           <ChatMessageList
             conversationId={_conversationId}
+            chatLLMContextTokens={chatLLM?.contextTokens}
             isMessageSelectionMode={isMessageSelectionMode}
             setIsMessageSelectionMode={setIsMessageSelectionMode}
             onConversationBranch={handleConversationBranch}
@@ -395,10 +426,11 @@ export function AppChat() {
     </Box>
 
     <Composer
+      chatLLM={chatLLM}
+      composerTextAreaRef={composerTextAreaRef}
       conversationId={focusedConversationId}
       isDeveloperMode={focusedSystemPurposeId === 'Developer'}
-      composerTextAreaRef={composerTextAreaRef}
-      onNewMessage={handleComposerNewMessage}
+      onAction={handleComposerAction}
       sx={{
         zIndex: 21, // position: 'sticky', bottom: 0,
         backgroundColor: 'background.surface',
@@ -427,7 +459,7 @@ export function AppChat() {
     {/* [confirmation] Reset Conversation */}
     {!!clearConversationId && <ConfirmationModal
       open onClose={() => setClearConversationId(null)} onPositive={handleConfirmedClearConversation}
-      confirmationText={'Are you sure you want to discard all the messages?'} positiveActionText={'Clear conversation'}
+      confirmationText={'Are you sure you want to discard all messages?'} positiveActionText={'Clear conversation'}
     />}
 
     {/* [confirmation] Delete All */}

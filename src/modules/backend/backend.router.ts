@@ -1,5 +1,12 @@
+import { z } from 'zod';
+
+import type { BackendCapabilities } from '~/modules/backend/state-backend';
+
 import { createTRPCRouter, publicProcedure } from '~/server/api/trpc.server';
 import { env } from '~/server/env.mjs';
+import { fetchJsonOrTRPCError } from '~/server/api/trpc.serverutils';
+
+import { analyticsListCapabilities } from './backend.analytics';
 
 
 /**
@@ -12,7 +19,8 @@ export const backendRouter = createTRPCRouter({
 
   /* List server-side capabilities (pre-configured by the deployer) */
   listCapabilities: publicProcedure
-    .query(async () => {
+    .query(async ({ ctx }) => {
+      analyticsListCapabilities(ctx.hostName);
       return {
         hasDB: !!env.POSTGRES_PRISMA_URL && !!env.POSTGRES_URL_NON_POOLING,
         hasBrowsing: !!env.PUPPETEER_WSS_ENDPOINT,
@@ -20,11 +28,25 @@ export const backendRouter = createTRPCRouter({
         hasImagingProdia: !!env.PRODIA_API_KEY,
         hasLlmAnthropic: !!env.ANTHROPIC_API_KEY,
         hasLlmAzureOpenAI: !!env.AZURE_OPENAI_API_KEY && !!env.AZURE_OPENAI_API_ENDPOINT,
+        hasLlmMistral: !!env.MISTRAL_API_KEY,
         hasLlmOllama: !!env.OLLAMA_API_HOST,
         hasLlmOpenAI: !!env.OPENAI_API_KEY || !!env.OPENAI_API_HOST,
         hasLlmOpenRouter: !!env.OPENROUTER_API_KEY,
         hasVoiceElevenLabs: !!env.ELEVENLABS_API_KEY,
-      };
+      } satisfies BackendCapabilities;
+    }),
+
+
+  // The following are used for various OAuth integrations
+
+  /* Exchange the OpenrRouter 'code' (from PKCS) for an OpenRouter API Key */
+  exchangeOpenRouterKey: publicProcedure
+    .input(z.object({ code: z.string() }))
+    .query(async ({ input }) => {
+      // Documented here: https://openrouter.ai/docs#oauth
+      return await fetchJsonOrTRPCError<{ key: string }, { code: string }>('https://openrouter.ai/api/v1/auth/keys', 'POST', {}, {
+        code: input.code,
+      }, 'Backend.exchangeOpenRouterKey');
     }),
 
 });
