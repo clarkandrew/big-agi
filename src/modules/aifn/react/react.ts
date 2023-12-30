@@ -5,7 +5,7 @@
 import { DLLMId } from '~/modules/llms/store-llms';
 import { callApiSearchGoogle } from '~/modules/google/search.client';
 import { callBrowseFetchPage } from '~/modules/browse/browse.client';
-import { callChatGenerate, VChatMessageIn } from '~/modules/llms/transports/chatGenerate';
+import { llmChatGenerateOrThrow, VChatMessageIn } from '~/modules/llms/llm.client';
 
 
 // prompt to implement the ReAct paradigm: https://arxiv.org/abs/2210.03629
@@ -128,7 +128,7 @@ export class Agent {
     S.messages.push({ role: 'user', content: prompt });
     let content: string;
     try {
-      content = (await callChatGenerate(llmId, S.messages, 500)).content;
+      content = (await llmChatGenerateOrThrow(llmId, S.messages, null, null, 500)).content;
     } catch (error: any) {
       content = `Error in callChat: ${error}`;
     }
@@ -187,8 +187,8 @@ async function search(query: string): Promise<string> {
 
 async function browse(url: string): Promise<string> {
   try {
-    const data = await callBrowseFetchPage(url);
-    return JSON.stringify(data ? { text: data } : { error: 'Issue reading the page' });
+    const page = await callBrowseFetchPage(url);
+    return JSON.stringify(page.content ? { text: page.content } : { error: 'Issue reading the page' });
   } catch (error) {
     console.error('Error browsing:', (error as Error).message);
     return 'An error occurred while browsing to the URL. Missing WSS Key?';
