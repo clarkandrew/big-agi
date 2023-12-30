@@ -2,7 +2,8 @@ import { create } from 'zustand';
 import { shallow } from 'zustand/shallow';
 import { persist } from 'zustand/middleware';
 
-import { ModelVendorId } from './vendors/IModelVendor';
+import type { ModelVendorId } from './vendors/vendors.registry';
+import type { SourceSetupOpenRouter } from './vendors/openrouter/openrouter.vendor';
 
 
 /**
@@ -15,6 +16,7 @@ export interface DLLM<TSourceSetup = unknown, TLLMOptions = unknown> {
   updated?: number | 0;
   description: string;
   tags: string[]; // UNUSED for now
+  // modelcaps: DModelCapability[];
   contextTokens: number;
   maxOutputTokens: number;
   hidden: boolean;
@@ -28,6 +30,17 @@ export interface DLLM<TSourceSetup = unknown, TLLMOptions = unknown> {
 }
 
 export type DLLMId = string;
+
+// export type DModelCapability =
+//   | 'input-text'
+//   | 'input-image-data'
+//   | 'input-multipart'
+//   | 'output-text'
+//   | 'output-function'
+//   | 'output-image-data'
+//   | 'if-chat'
+//   | 'if-fast-chat'
+//   ;
 
 // Model interfaces (chat, and function calls) - here as a preview, will be used more broadly in the future
 export const LLM_IF_OAI_Chat = 'oai-chat';
@@ -76,6 +89,9 @@ interface ModelsActions {
   setChatLLMId: (id: DLLMId | null) => void;
   setFastLLMId: (id: DLLMId | null) => void;
   setFuncLLMId: (id: DLLMId | null) => void;
+
+  // special
+  setOpenRoutersKey: (key: string) => void;
 }
 
 type LlmsStore = ModelsData & ModelsActions;
@@ -162,12 +178,21 @@ export const useModelsStore = create<LlmsStore>()(
         set(state => ({
           sources: state.sources.map((source: DModelSource): DModelSource =>
             source.id === id
-              ? {
-                ...source,
-                setup: { ...source.setup, ...partialSetup },
-              } : source,
+              ? { ...source, setup: { ...source.setup, ...partialSetup } }
+              : source,
           ),
         })),
+
+      setOpenRoutersKey: (key: string) =>
+        set(state => {
+          const openRouterSource = state.sources.find(source => source.vId === 'openrouter');
+          if (!openRouterSource) return state;
+          return {
+            sources: state.sources.map(source => source.id === openRouterSource.id
+              ? { ...source, setup: { ...source.setup, oaiKey: key satisfies SourceSetupOpenRouter['oaiKey'] } }
+              : source),
+          };
+        }),
 
     }),
     {
@@ -252,28 +277,7 @@ export function useChatLLM() {
   return useModelsStore(state => {
     const { chatLLMId } = state;
     const chatLLM = chatLLMId ? state.llms.find(llm => llm.id === chatLLMId) ?? null : null;
-    return { chatLLMId, chatLLM };
+    return { chatLLM };
   }, shallow);
 }
 
-/**
- * Source-specific read/write - great time saver
- */
-export function useSourceSetup<TSourceSetup, TAccess>(sourceId: DModelSourceId, getAccess: (partialSetup?: Partial<TSourceSetup>) => TAccess) {
-  // invalidate when the setup changes
-  const { updateSourceSetup, ...rest } = useModelsStore(state => {
-    const source: DModelSource<TSourceSetup> | null = state.sources.find(source => source.id === sourceId) ?? null;
-    const sourceLLMs = source ? state.llms.filter(llm => llm._source === source) : [];
-    return {
-      source,
-      sourceLLMs,
-      sourceHasLLMs: !!sourceLLMs.length,
-      access: getAccess(source?.setup),
-      updateSourceSetup: state.updateSourceSetup,
-    };
-  }, shallow);
-
-  // convenience function for this source
-  const updateSetup = (partialSetup: Partial<TSourceSetup>) => updateSourceSetup<TSourceSetup>(sourceId, partialSetup);
-  return { ...rest, updateSetup };
-}

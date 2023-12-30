@@ -1,10 +1,9 @@
 import { OobaboogaIcon } from '~/common/components/icons/OobaboogaIcon';
 
 import type { IModelVendor } from '../IModelVendor';
-import type { OpenAIAccessSchema } from '../../transports/server/openai/openai.router';
-import type { VChatFunctionIn, VChatMessageIn, VChatMessageOrFunctionCallOut, VChatMessageOut } from '../../transports/chatGenerate';
+import type { OpenAIAccessSchema } from '../../server/openai/openai.router';
 
-import { LLMOptionsOpenAI, openAICallChatGenerate } from '../openai/openai.vendor';
+import { LLMOptionsOpenAI, ModelVendorOpenAI } from '../openai/openai.vendor';
 import { OpenAILLMOptions } from '../openai/OpenAILLMOptions';
 
 import { OobaboogaSourceSetup } from './OobaboogaSourceSetup';
@@ -14,7 +13,7 @@ export interface SourceSetupOobabooga {
   oaiHost: string;  // use OpenAI-compatible non-default hosts (full origin path)
 }
 
-export const ModelVendorOoobabooga: IModelVendor<SourceSetupOobabooga, LLMOptionsOpenAI, OpenAIAccessSchema> = {
+export const ModelVendorOoobabooga: IModelVendor<SourceSetupOobabooga, OpenAIAccessSchema, LLMOptionsOpenAI> = {
   id: 'oobabooga',
   name: 'Oobabooga',
   rank: 25,
@@ -30,7 +29,7 @@ export const ModelVendorOoobabooga: IModelVendor<SourceSetupOobabooga, LLMOption
   initializeSetup: (): SourceSetupOobabooga => ({
     oaiHost: 'http://127.0.0.1:5000',
   }),
-  getAccess: (partialSetup): OpenAIAccessSchema => ({
+  getTransportAccess: (partialSetup): OpenAIAccessSchema => ({
     dialect: 'oobabooga',
     oaiKey: '',
     oaiOrg: '',
@@ -38,10 +37,9 @@ export const ModelVendorOoobabooga: IModelVendor<SourceSetupOobabooga, LLMOption
     heliKey: '',
     moderationCheck: false,
   }),
-  callChatGenerate(llm, messages: VChatMessageIn[], maxTokens?: number): Promise<VChatMessageOut> {
-    return openAICallChatGenerate(this.getAccess(llm._source.setup), llm.options, messages, null, null, maxTokens);
-  },
-  callChatGenerateWF(llm, messages: VChatMessageIn[], functions: VChatFunctionIn[] | null, forceFunctionName: string | null, maxTokens?: number): Promise<VChatMessageOrFunctionCallOut> {
-    return openAICallChatGenerate(this.getAccess(llm._source.setup), llm.options, messages, functions, forceFunctionName, maxTokens);
-  },
+
+  // OpenAI transport (oobabooga dialect in 'access')
+  rpcUpdateModelsQuery: ModelVendorOpenAI.rpcUpdateModelsQuery,
+  rpcChatGenerateOrThrow: ModelVendorOpenAI.rpcChatGenerateOrThrow,
+  streamingChatGenerateOrThrow: ModelVendorOpenAI.streamingChatGenerateOrThrow,
 };

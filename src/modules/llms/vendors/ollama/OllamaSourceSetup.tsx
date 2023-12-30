@@ -6,13 +6,14 @@ import { FormTextField } from '~/common/components/forms/FormTextField';
 import { InlineError } from '~/common/components/InlineError';
 import { Link } from '~/common/components/Link';
 import { SetupFormRefetchButton } from '~/common/components/forms/SetupFormRefetchButton';
-import { apiQuery } from '~/common/util/trpc.client';
 import { asValidURL } from '~/common/util/urlUtils';
 
-import { DModelSourceId, useModelsStore, useSourceSetup } from '../../store-llms';
+import { DModelSourceId } from '../../store-llms';
+import { useLlmUpdateModels } from '../useLlmUpdateModels';
+import { useSourceSetup } from '../useSourceSetup';
+
 import { ModelVendorOllama } from './ollama.vendor';
-import { OllamaAdmin } from './OllamaAdmin';
-import { modelDescriptionToDLLM } from '../openai/OpenAISourceSetup';
+import { OllamaAdministration } from './OllamaAdministration';
 
 
 export function OllamaSourceSetup(props: { sourceId: DModelSourceId }) {
@@ -22,7 +23,7 @@ export function OllamaSourceSetup(props: { sourceId: DModelSourceId }) {
 
   // external state
   const { source, access, updateSetup } =
-    useSourceSetup(props.sourceId, ModelVendorOllama.getAccess);
+    useSourceSetup(props.sourceId, ModelVendorOllama);
 
   // derived state
   const { ollamaHost } = access;
@@ -32,14 +33,8 @@ export function OllamaSourceSetup(props: { sourceId: DModelSourceId }) {
   const shallFetchSucceed = !hostError;
 
   // fetch models
-  const { isFetching, refetch, isError, error } = apiQuery.llmOllama.listModels.useQuery({ access }, {
-    enabled: false, // !sourceHasLLMs && shallFetchSucceed,
-    onSuccess: models => source && useModelsStore.getState().setLLMs(
-      models.models.map(model => modelDescriptionToDLLM(model, source)),
-      props.sourceId,
-    ),
-    staleTime: Infinity,
-  });
+  const { isFetching, refetch, isError, error } =
+    useLlmUpdateModels(ModelVendorOllama, access, false /* !sourceHasLLMs && shallFetchSucceed */, source);
 
   return <>
 
@@ -63,7 +58,7 @@ export function OllamaSourceSetup(props: { sourceId: DModelSourceId }) {
 
     {isError && <InlineError error={error} />}
 
-    {adminOpen && <OllamaAdmin access={access} onClose={() => setAdminOpen(false)} />}
+    {adminOpen && <OllamaAdministration access={access} onClose={() => setAdminOpen(false)} />}
 
   </>;
 }

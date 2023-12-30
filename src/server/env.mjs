@@ -4,9 +4,9 @@ import { z } from 'zod';
 export const env = createEnv({
   server: {
 
-    // Postgres, for optional storage via Prisma
-    POSTGRES_PRISMA_URL: z.string().url().optional(),
-    POSTGRES_URL_NON_POOLING: z.string().url().optional(),
+    // Backend Postgres, for optional storage via Prisma
+    POSTGRES_PRISMA_URL: z.string().optional(),
+    POSTGRES_URL_NON_POOLING: z.string().optional(),
 
     // LLM: OpenAI
     OPENAI_API_KEY: z.string().optional(),
@@ -20,6 +20,12 @@ export const env = createEnv({
     // LLM: Anthropic
     ANTHROPIC_API_KEY: z.string().optional(),
     ANTHROPIC_API_HOST: z.string().url().optional(),
+
+    // LLM: Google AI's Gemini
+    GEMINI_API_KEY: z.string().optional(),
+
+    // LLM: Mistral
+    MISTRAL_API_KEY: z.string().optional(),
 
     // LLM: Ollama
     OLLAMA_API_HOST: z.string().url().optional(),
@@ -44,13 +50,23 @@ export const env = createEnv({
 
     // Browsing Service
     PUPPETEER_WSS_ENDPOINT: z.string().url().optional(),
-    
+
+    // Backend: Analytics flags (e.g. which hostname responds) for managed installs
+    BACKEND_ANALYTICS: z.string().optional().transform(list => (list || '').split(';').filter(flag => !!flag)),
+
+    // Backend: HTTP Basic Authentication
+    HTTP_BASIC_AUTH_USERNAME: z.string().optional(),
+    HTTP_BASIC_AUTH_PASSWORD: z.string().optional(),
+
   },
 
   onValidationError: error => {
     console.error('❌ Invalid environment variables:', error.issues);
     throw new Error('Invalid environment variable');
   },
+
+  // matches user expectations - see https://github.com/enricoros/big-AGI/issues/279
+  emptyStringAsUndefined: true,
 
   // with Noext.JS >= 13.4.4 we'd only need to destructure client variables
   experimental__runtimeEnv: {},
