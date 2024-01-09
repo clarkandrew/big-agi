@@ -212,6 +212,13 @@ const _knownLocalAIChatModels: ManualMappings = [
     contextWindow: 4096,
     interfaces: [LLM_IF_OAI_Chat],
   },
+  {
+    idPrefix: '/home/user/.cache/lm studio/models/TheBloke/dolphin 2.6 mistral 7B GGUF/dolphin 2.6 mistral 7b.Q5_K_M.gguf',
+    label: 'dolphin 2.6 mistral',
+    description: 'Local baby',
+    contextWindow: 8192,
+    interfaces: [LLM_IF_OAI_Chat],
+  },
 ];
 
 export function localAIModelToModelDescription(modelId: string): ModelDescriptionSchema {
