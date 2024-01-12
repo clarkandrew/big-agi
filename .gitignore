@@ -39,3 +39,4 @@ next-env.d.ts
 # other
 .idea/
 CHATS/conversations-2023-11-29T19-41-44.200Z.json
+.aider*

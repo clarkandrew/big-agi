@@ -199,6 +199,13 @@ export function lmStudioModelToModelDescription(modelId: string): ModelDescripti
 // [LocalAI]
 const _knownLocalAIChatModels: ManualMappings = [
   {
+    idPrefix: 'localLLM',
+    label: 'localLLM',
+    description: 'GPT4All-J on LocalAI',
+    contextWindow: 4096,
+    interfaces: [LLM_IF_OAI_Chat],
+  },
+  {
     idPrefix: 'ggml-gpt4all-j',
     label: 'GPT4All-J',
     description: 'GPT4All-J on LocalAI',
@@ -213,8 +220,8 @@ const _knownLocalAIChatModels: ManualMappings = [
     interfaces: [LLM_IF_OAI_Chat],
   },
   {
-    idPrefix: '/home/user/.cache/lm studio/models/TheBloke/dolphin 2.6 mistral 7B GGUF/dolphin 2.6 mistral 7b.Q5_K_M.gguf',
-    label: 'dolphin 2.6 mistral',
+    idPrefix: '/home/user/.cache/lm-studio/models/TheBloke/dolphin-2.6-mistral-7B-GGUF/dolphin-2.6-mistral-7b.Q5_K_M.gguf',
+    label: '/home/user/.cache/lm-studio/models/TheBloke/dolphin-2.6-mistral-7B-GGUF/dolphin-2.6-mistral-7b.Q5_K_M.gguf',
     description: 'Local baby',
     contextWindow: 8192,
     interfaces: [LLM_IF_OAI_Chat],
@@ -222,6 +229,7 @@ const _knownLocalAIChatModels: ManualMappings = [
 ];
 
 export function localAIModelToModelDescription(modelId: string): ModelDescriptionSchema {
+  console.log("Unknown model id: " + modelId)
   return fromManualMapping(_knownLocalAIChatModels, modelId, undefined, undefined, {
     idPrefix: modelId,
     label: modelId

@@ -23,7 +23,7 @@ function updateModelsFn<TSourceSetup>(data: { models: ModelDescriptionSchema[] }
 function modelDescriptionToDLLMOpenAIOptions<TSourceSetup, TLLMOptions>(model: ModelDescriptionSchema, source: DModelSource<TSourceSetup>): DLLM<TSourceSetup, TLLMOptions> {
 
   // null means unknown contenxt/output tokens
-  const contextTokens = model.contextWindow || null;
+  const contextTokens = model.contextWindow || 4096;
   const maxOutputTokens = model.maxCompletionTokens || (contextTokens ? Math.round(contextTokens / 2) : null);
   const llmResponseTokensRatio = model.maxCompletionTokens ? 1 / 2 : 1 / 4;
   const llmResponseTokens = maxOutputTokens ? Math.round(maxOutputTokens * llmResponseTokensRatio) : null;
