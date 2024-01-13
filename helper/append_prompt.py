@@ -26,28 +26,46 @@ def add_prompt():
     title = Prompt.ask("Enter the title of the new prompt")
     print_panel(title, "Title")
     
-    # description = Prompt.ask("Enter the description of the new prompt")
-    # print_panel(description, "Description")
+    
+    
+    
+    
+    # symbol = Prompt.ask("Enter the symbol of the new prompt")
+    # print_panel(symbol, "Symbol")
+    
+    console.print("Enter the system message of the new prompt (enclose the message between { and }):")
+  
+    system_message_lines = []
+    while True:
+        line = input()
+        if line.startswith('{{'):
+            system_message_lines.append(line[2:])
+            break
+        else:
+            console.print("[bold red]Your system message must start with '{{'.[/bold red]")
+            console.print("Enter the system message of the new prompt (enclose the message between '{{' and '}}'):")
+    # Now collect all lines until a line ending with '}' is found
+    while True:
+        line = input()
+        if line.endswith('}}'):
+            system_message_lines.append(line[:-2])
+            break
+        else:
+            system_message_lines.append(line)
+    system_message = '\n'.join(system_message_lines).strip()
+    print_panel(system_message, "System Message")
+
+    symbol = title[0:2]
+    
+    description = Prompt.ask("Enter the description of the new prompt")
+    if len(description)<5:
+        description = system_message[0:25]
+    print_panel(description, "Description")
     
     examples_input = Prompt.ask("Enter the examples of the new prompt (separate multiple examples with a comma)")
     examples = [example.strip() for example in examples_input.split(',')]  # Process examples
     print_panel(examples, "Examples")
     
-    # symbol = Prompt.ask("Enter the symbol of the new prompt")
-    # print_panel(symbol, "Symbol")
-    
-    console.print("Enter the system message of the new prompt (press enter twice when finished):")
-    system_message_lines = []
-    while True:
-        line = input()
-        if line:
-            system_message_lines.append(line)
-        else:
-            break
-    system_message = '\n'.join(system_message_lines)
-    print_panel(system_message, "System Message")
-    description = system_message[0:25]
-    symbol = title[0:2]
     # Confirm the new prompt before adding
     new_prompt = {
         "title": title,
