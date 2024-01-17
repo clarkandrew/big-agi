@@ -5,11 +5,11 @@ import { Box, Chip, IconButton, List, ListItem, ListItemButton, Typography } fro
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 
-import { DLLM, DLLMId, DModelSourceId, useModelsStore } from '~/modules/llms/store-llms';
-import { IModelVendor } from '~/modules/llms/vendors/IModelVendor';
-import { findVendorById } from '~/modules/llms/vendors/vendors.registry';
-
 import { GoodTooltip } from '~/common/components/GoodTooltip';
+
+import { DLLM, DLLMId, DModelSourceId, useModelsStore } from '../store-llms';
+import { IModelVendor } from '../vendors/IModelVendor';
+import { findVendorById } from '../vendors/vendors.registry';
 
 
 function ModelItem(props: { llm: DLLM, vendor: IModelVendor, chipChat: boolean, chipFast: boolean, chipFunc: boolean, onClick: () => void }) {
@@ -24,42 +24,40 @@ function ModelItem(props: { llm: DLLM, vendor: IModelVendor, chipChat: boolean, 
   if (llm.contextTokens) {
     tooltip += llm.contextTokens.toLocaleString() + ' tokens';
     if (llm.maxOutputTokens)
-      tooltip += ' / ' + llm.maxOutputTokens.toLocaleString() + ' max output tokens'
+      tooltip += ' / ' + llm.maxOutputTokens.toLocaleString() + ' max output tokens';
   } else
     tooltip += 'token count not provided';
 
   return (
-    <ListItem>
-      <ListItemButton onClick={props.onClick} sx={{ alignItems: 'center', gap: 1 }}>
+    <ListItemButton color='primary' onClick={props.onClick} sx={{ alignItems: 'center', gap: 1 }}>
 
-        {/* Model Name */}
-        <GoodTooltip title={tooltip}>
-          <Typography sx={llm.hidden ? { color: 'neutral.plainDisabledColor' } : undefined}>
-            {label}
-          </Typography>
-        </GoodTooltip>
+      {/* Model Name */}
+      <GoodTooltip title={tooltip}>
+        <Typography sx={llm.hidden ? { color: 'neutral.plainDisabledColor' } : undefined}>
+          {label}
+        </Typography>
+      </GoodTooltip>
 
-        {/* --> */}
-        <Box sx={{ flex: 1 }} />
+      {/* --> */}
+      <Box sx={{ flex: 1 }} />
 
-        {props.chipChat && <Chip size='sm' variant='plain' sx={{ boxShadow: 'sm' }}>chat</Chip>}
+      {props.chipChat && <Chip size='sm' variant='plain' sx={{ boxShadow: 'sm' }}>chat</Chip>}
 
-        {props.chipFast && <Chip size='sm' variant='plain' sx={{ boxShadow: 'sm' }}>fast</Chip>}
+      {props.chipFast && <Chip size='sm' variant='plain' sx={{ boxShadow: 'sm' }}>fast</Chip>}
 
-        {props.chipFunc && <Chip size='sm' variant='plain' sx={{ boxShadow: 'sm' }}>𝑓n</Chip>}
+      {props.chipFunc && <Chip size='sm' variant='plain' sx={{ boxShadow: 'sm' }}>𝑓n</Chip>}
 
-        {llm.hidden && (
-          <IconButton disabled size='sm'>
-            <VisibilityOffOutlinedIcon />
-          </IconButton>
-        )}
-
-        <IconButton size='sm'>
-          <SettingsOutlinedIcon />
+      {llm.hidden && (
+        <IconButton disabled size='sm'>
+          <VisibilityOffOutlinedIcon />
         </IconButton>
+      )}
 
-      </ListItemButton>
-    </ListItem>
+      <IconButton size='sm'>
+        <SettingsOutlinedIcon />
+      </IconButton>
+
+    </ListItemButton>
   );
 }
 
@@ -113,11 +111,10 @@ export function ModelsList(props: {
   }
 
   return (
-    <List variant='soft' size='sm' sx={{
-      borderRadius: 'sm',
-      pl: { xs: 0, md: 1 },
-      overflowY: 'auto',
-    }}>
+    <List
+      variant='soft' size='sm'
+      sx={{ borderRadius: 'md', overflowY: 'auto' }}
+    >
       {items.length > 0 ? items : (
         <ListItem>
           <Typography level='body-sm'>
