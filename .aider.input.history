@@ -1,0 +1,150 @@
+
+# 2024-01-11 20:11:07.336078
++/add src/
+
+# 2024-01-11 20:11:49.670595
++/drop as/add .aiderignore
+
+# 2024-01-11 20:11:56.141218
++/drop
+
+# 2024-01-11 20:11:58.420747
++/add src/
+
+# 2024-01-11 20:12:26.818745
++/drop src/modules/llms/vendors/openai/openai.vendor.ts
+
+# 2024-01-11 20:12:27.164571
++/add src/modules/llms/models-modal/ModelsList.tsx
+
+# 2024-01-11 20:12:32.157730
++/drop src/modules/llms/models-modal/ModelsList.tsx
+
+# 2024-01-11 20:12:32.513295
++/add src/modules/llms/models-modal/ModelsModal.tsx
+
+# 2024-01-11 20:12:51.700468
++How can I ensure I don't get the error ': Token computations are disabled because this model does not declare the context window size.' when using a model
+
+# 2024-01-11 20:15:11.742478
++Instead of setting a default, how can I actually define model context from localai response?
+
+# 2024-01-11 20:15:34.603094
++/add src/modules/llms/server/llm.server.types.ts
+
+# 2024-01-11 20:15:35.880439
++/drop src/modules/llms/server/llm.server.types.ts
+
+# 2024-01-11 20:15:36.243548
++/add src/modules/llms/server/llm.server.types.ts
+
+# 2024-01-11 20:15:37.830556
++/drop src/modules/llms/server/llm.server.types.ts
+
+# 2024-01-11 20:15:39.060720
++/clear
+
+# 2024-01-11 20:15:46.278729
++How can I ensure I don't get the error ': Token computations are disabled because this model does not declare the context window size.' when using a modelInstead of setting a default, how can I actually define model context from l
++ocalai response? 
+
+# 2024-01-12 18:31:20.390855
++/;s
+
+# 2024-01-12 18:31:21.764308
++/ls
+
+# 2024-01-12 18:31:26.048241
++/add .aiderignore
+
+# 2024-01-12 18:31:34.919734
++/add src/personas.json
+
+# 2024-01-12 18:35:59.985924
++/drop src/personas.json
+
+# 2024-01-12 18:36:05.641147
++/add src/data.ts
+
+# 2024-01-12 18:36:06.375343
++/drop src/data.ts
+
+# 2024-01-12 18:36:06.511403
++/add src/personas.json
+
+# 2024-01-12 18:46:21.186451
++/add tsconfig.json
+
+# 2024-01-12 18:49:22.106184
++/drop tsconfig.json
+
+# 2024-01-12 18:57:13.792806
++/add helper/append_prompt.py
+
+# 2024-01-12 19:37:35.511748
++1. the prompts json path is helper/personas.json
+
+# 2024-01-12 19:39:03.579089
++/drop helper/personas.json
+
+# 2024-01-12 19:39:17.633647
++/add helper/personas.json
+
+# 2024-01-12 19:56:44.898116
++/add .aiderignore helper/append_prompt.py helper/personas.json src/personas.json
+
+# 2024-01-12 19:56:46.083114
++/ls
+
+# 2024-01-12 19:56:56.773611
++/add helper/append_prompt.py
+
+# 2024-01-12 19:56:58.362699
++/ls
+
+# 2024-01-12 19:57:02.565146
++/drop .aiderignore
+
+# 2024-01-12 19:57:08.686805
++/drop helper/personas.json
+
+# 2024-01-12 19:57:11.958884
++/drop src/
+
+# 2024-01-12 19:57:18.676499
++/drop src/personas.json
+
+# 2024-01-12 19:58:00.913144
++Sometimes prompts will have multiple newlines. How can users paste in their full prompts with multiple newliens without it registering as enter and submit. Please thinks tep-by-step.
+
+# 2024-01-12 20:06:35.220254
++How about instead we instruct the user to paste their prompt between { and } then parse it out?
+
+# 2024-01-12 20:09:29.578428
++Please help me improve this further by thinking step-by-step to improve the sys message pasting. It currently spams invalid input after typing { then pasting...
++
++How about it only does that if the sys message str doesn't start with {. If it does start with { it allows as many newlines as pasted, and only stops accepting input upon finding } to close the bracket.
+
+# 2024-01-12 20:13:29.956395
++/drop src/personas.json
+
+# 2024-01-12 20:13:30.241337
++/add helper/personas_backup.json
+
+# 2024-01-12 20:31:41.834297
++/drop helper/personas_backup.json
+
+# 2024-01-12 20:31:51.618297
++/add src/personas.json
+
+# 2024-01-12 20:45:51.844800
++/drop .aiderignore
+
+# 2024-01-12 20:45:52.177194
++/drop helper/append_prompt.py
+
+# 2024-01-12 20:45:52.309305
++/drop src/personas.json
+
+# 2024-01-12 20:45:52.364677
++/drop helper/personas.json
